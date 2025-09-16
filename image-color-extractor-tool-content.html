@@ -1,0 +1,104 @@
+<!--
+  Tool: Image Color Extractor
+  To use this, create a new "Tool" in the WordPress admin,
+  give it the title "Image Color Extractor", and paste this entire
+  HTML content into the "Code" editor (not the Visual editor).
+-->
+
+<div class="tool-container">
+    <div class="tool-input">
+        <label for="image-upload">Upload an image:</label>
+        <input type="file" id="image-upload" accept="image/*">
+    </div>
+
+    <div class="image-preview-container" style="margin-top: 20px; max-width: 500px;">
+        <img id="image-preview" src="" alt="Image Preview" style="max-width: 100%; display: none;">
+    </div>
+
+    <div class="color-palette-container" style="margin-top: 20px;">
+        <h3>Extracted Colors:</h3>
+        <div id="color-palette" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
+    </div>
+</div>
+
+<canvas id="hidden-canvas" style="display:none;"></canvas>
+
+<style>
+    .color-box {
+        width: 100px;
+        height: 100px;
+        border: 1px solid #ccc;
+        text-align: center;
+        padding: 10px;
+        box-sizing: border-box;
+        cursor: pointer;
+    }
+    .color-box:hover {
+        opacity: 0.8;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const imageUpload = document.getElementById('image-upload');
+    const imagePreview = document.getElementById('image-preview');
+    const colorPalette = document.getElementById('color-palette');
+    const canvas = document.getElementById('hidden-canvas');
+    const ctx = canvas.getContext('2d');
+
+    imageUpload.addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            imagePreview.src = e.target.result;
+            imagePreview.style.display = 'block';
+            imagePreview.onload = function() {
+                extractColors(imagePreview);
+            }
+        }
+        reader.readAsDataURL(file);
+    });
+
+    function extractColors(img) {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+        const colorCounts = {};
+        const step = 5; // Check every 5th pixel to speed it up
+
+        for (let i = 0; i < imageData.length; i += 4 * step) {
+            const r = imageData[i];
+            const g = imageData[i + 1];
+            const b = imageData[i + 2];
+            const rgb = `rgb(${r},${g},${b})`;
+
+            if (r > 240 && g > 240 && b > 240) continue; // Skip near-white colors
+
+            colorCounts[rgb] = (colorCounts[rgb] || 0) + 1;
+        }
+
+        const sortedColors = Object.keys(colorCounts).sort((a, b) => colorCounts[b] - colorCounts[a]);
+
+        displayPalette(sortedColors.slice(0, 10)); // Display top 10 colors
+    }
+
+    function displayPalette(colors) {
+        colorPalette.innerHTML = '';
+        colors.forEach(color => {
+            const colorBox = document.createElement('div');
+            colorBox.className = 'color-box';
+            colorBox.style.backgroundColor = color;
+            colorBox.innerHTML = `<span style="background: #fff; padding: 2px;">${color}</span>`;
+            colorBox.addEventListener('click', () => {
+                navigator.clipboard.writeText(color);
+                alert('Copied: ' + color);
+            });
+            colorPalette.appendChild(colorBox);
+        });
+    }
+});
+</script>
