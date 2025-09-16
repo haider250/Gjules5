@@ -28,7 +28,35 @@ get_header(); ?>
 
                     <h2>Your Favorite Tools</h2>
                     <div class="favorite-tools-list">
-                        <p><em>(Favorite tools functionality will be implemented here.)</em></p>
+                        <?php
+                        $user_id = get_current_user_id();
+                        $favorites = get_user_meta( $user_id, '_favorite_tools', true );
+
+                        if ( ! empty( $favorites ) && is_array( $favorites ) ) {
+                            $args = array(
+                                'post_type' => 'tools',
+                                'post__in'  => $favorites,
+                                'orderby'   => 'post__in',
+                                'posts_per_page' => -1, // Show all favorites
+                            );
+                            $favorite_tools_query = new WP_Query( $args );
+
+                            if ( $favorite_tools_query->have_posts() ) :
+                                echo '<ul>';
+                                while ( $favorite_tools_query->have_posts() ) : $favorite_tools_query->the_post();
+                                    ?>
+                                    <li><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></li>
+                                    <?php
+                                endwhile;
+                                echo '</ul>';
+                                wp_reset_postdata();
+                            else :
+                                echo '<p>You have not favorited any tools yet.</p>';
+                            endif;
+                        } else {
+                            echo '<p>You have not favorited any tools yet.</p>';
+                        }
+                        ?>
                     </div>
 
                     <hr>

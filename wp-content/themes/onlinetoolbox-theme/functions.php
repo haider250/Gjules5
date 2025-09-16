@@ -128,3 +128,60 @@ function onlinetoolbox_register_tool_taxonomy() {
     register_taxonomy( 'tool_category', array( 'tools' ), $args );
 }
 add_action( 'init', 'onlinetoolbox_register_tool_taxonomy', 0 );
+
+/**
+ * Enqueue scripts and styles.
+ */
+function onlinetoolbox_enqueue_scripts() {
+    // We will create this file in the next step
+    wp_enqueue_script( 'onlinetoolbox-favorites', get_template_directory_uri() . '/js/favorites.js', array( 'jquery' ), '1.0', true );
+
+    // Pass data to the script
+    wp_localize_script( 'onlinetoolbox-favorites', 'favorites_ajax_object', array(
+        'ajax_url' => admin_url( 'admin-ajax.php' ),
+        'nonce'    => wp_create_nonce( 'favorites_nonce' ),
+    ) );
+}
+add_action( 'wp_enqueue_scripts', 'onlinetoolbox_enqueue_scripts' );
+
+/**
+ * AJAX handler for toggling a tool's favorite status.
+ */
+function onlinetoolbox_handle_favorite_toggle() {
+    // Verify nonce
+    if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( $_POST['nonce'], 'favorites_nonce' ) ) {
+        wp_send_json_error( 'Nonce verification failed.' );
+    }
+
+    // Check if user is logged in
+    if ( ! is_user_logged_in() ) {
+        wp_send_json_error( 'You must be logged in to favorite tools.' );
+    }
+
+    // Get the tool ID from the AJAX request
+    $tool_id = isset( $_POST['tool_id'] ) ? intval( $_POST['tool_id'] ) : 0;
+    if ( $tool_id === 0 ) {
+        wp_send_json_error( 'Invalid tool ID.' );
+    }
+
+    $user_id = get_current_user_id();
+    $favorites = get_user_meta( $user_id, '_favorite_tools', true );
+
+    if ( ! is_array( $favorites ) ) {
+        $favorites = array();
+    }
+
+    // Check if the tool is already a favorite
+    if ( in_array( $tool_id, $favorites ) ) {
+        // Remove from favorites
+        $new_favorites = array_diff( $favorites, array( $tool_id ) );
+        update_user_meta( $user_id, '_favorite_tools', $new_favorites );
+        wp_send_json_success( array( 'status' => 'removed' ) );
+    } else {
+        // Add to favorites
+        $favorites[] = $tool_id;
+        update_user_meta( $user_id, '_favorite_tools', $favorites );
+        wp_send_json_success( array( 'status' => 'added' ) );
+    }
+}
+add_action( 'wp_ajax_toggle_favorite', 'onlinetoolbox_handle_favorite_toggle' );

@@ -28,7 +28,22 @@ get_header(); ?>
 
                 <footer class="entry-footer">
                     <?php
-                        // We can add meta information here later, like categories or tags.
+                    if ( is_user_logged_in() ) {
+                        $user_id = get_current_user_id();
+                        $tool_id = get_the_ID();
+                        $favorites = get_user_meta( $user_id, '_favorite_tools', true );
+                        if ( ! is_array( $favorites ) ) {
+                            $favorites = array();
+                        }
+
+                        $is_favorite = in_array( $tool_id, $favorites );
+                        $button_text = $is_favorite ? 'Remove from Favorites' : 'Add to Favorites';
+                        ?>
+                        <button id="favorite-toggle-btn" data-tool-id="<?php echo esc_attr( $tool_id ); ?>">
+                            <?php echo esc_html( $button_text ); ?>
+                        </button>
+                        <?php
+                    }
                     ?>
                 </footer><!-- .entry-footer -->
             </article><!-- #post-<?php the_ID(); ?> -->
