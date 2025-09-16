@@ -1,0 +1,91 @@
+<!--
+  Tool: AI Color Palette Generator
+  To use this, create a new "Tool" in the WordPress admin,
+  give it the title "AI Color Palette Generator", and paste this entire
+  HTML content into the "Code" editor (not the Visual editor).
+-->
+
+<div class="tool-container">
+    <h3>Upload an Image</h3>
+    <p>The tool will analyze the colors in your image and generate a harmonious color palette.</p>
+
+    <div class="tool-input">
+        <input type="file" id="ai-image-upload" accept="image/*">
+    </div>
+
+    <div class="image-preview-container" style="margin-top: 20px; max-width: 500px; min-height: 100px;">
+        <img id="ai-image-preview" src="" alt="Image Preview" style="max-width: 100%; display: none;">
+    </div>
+
+    <div class="palette-results-container" style="margin-top: 20px;">
+        <h3>Generated Palette:</h3>
+        <div id="ai-color-palette" style="display: flex; flex-wrap: wrap; gap: 10px; padding: 10px; border: 1px solid #eee;">
+            <p>Your color palette will appear here.</p>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript logic to power the tool -->
+<script src="https://cdn.jsdelivr.net/npm/extract-colors/dist/extract-colors.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const imageUpload = document.getElementById('ai-image-upload');
+    const imagePreview = document.getElementById('ai-image-preview');
+    const colorPaletteContainer = document.getElementById('ai-color-palette');
+
+    imageUpload.addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            imagePreview.src = e.target.result;
+            imagePreview.style.display = 'block';
+
+            colorPaletteContainer.innerHTML = '<p>Analyzing colors...</p>';
+
+            extractColors(imagePreview.src)
+                .then(palette => {
+                    displayPalette(palette);
+                })
+                .catch(error => {
+                    console.error(error);
+                    colorPaletteContainer.innerHTML = '<p>Could not analyze image. Please try another one.</p>';
+                });
+        }
+        reader.readAsDataURL(file);
+    });
+
+    function displayPalette(palette) {
+        colorPaletteContainer.innerHTML = ''; // Clear loading message
+        palette.forEach(color => {
+            const colorBox = document.createElement('div');
+            const hexColor = color.hex;
+            colorBox.style.width = '100px';
+            colorBox.style.height = '100px';
+            colorBox.style.background = hexColor;
+            colorBox.style.cursor = 'pointer';
+            colorBox.style.display = 'flex';
+            colorBox.style.alignItems = 'flex-end';
+            colorBox.style.padding = '5px';
+            colorBox.title = `Click to copy ${hexColor}`;
+
+            const colorCode = document.createElement('span');
+            colorCode.style.background = 'rgba(255, 255, 255, 0.8)';
+            colorCode.style.padding = '2px 4px';
+            colorCode.style.borderRadius = '3px';
+            colorCode.style.fontSize = '12px';
+            colorCode.textContent = hexColor;
+
+            colorBox.appendChild(colorCode);
+
+            colorBox.addEventListener('click', () => {
+                navigator.clipboard.writeText(hexColor);
+                alert(`Copied ${hexColor} to clipboard!`);
+            });
+
+            colorPaletteContainer.appendChild(colorBox);
+        });
+    }
+});
+</script>
