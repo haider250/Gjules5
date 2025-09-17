@@ -170,18 +170,60 @@ function setupCategoryFilters() {
 
 
 /**
- * Sets up the mobile menu toggle functionality.
+ * Sets up the mobile menu toggle functionality with focus trapping.
  */
 function setupMobileMenu() {
     const mobileMenuButton = document.getElementById('mobile-menu-button');
     const mobileMenu = document.getElementById('mobile-menu');
 
-    if (mobileMenuButton && mobileMenu) {
-        mobileMenuButton.addEventListener('click', () => {
-            const isHidden = mobileMenu.classList.toggle('hidden');
-            mobileMenuButton.setAttribute('aria-expanded', !isHidden);
-        });
+    if (!mobileMenuButton || !mobileMenu) return;
+
+    const focusableElements = mobileMenu.querySelectorAll('a[href], button');
+    const firstFocusableElement = focusableElements[0];
+    const lastFocusableElement = focusableElements[focusableElements.length - 1];
+    let lastFocusedElement;
+
+    function openMenu() {
+        lastFocusedElement = document.activeElement;
+        mobileMenu.classList.remove('hidden');
+        mobileMenuButton.setAttribute('aria-expanded', 'true');
+        firstFocusableElement.focus();
+        document.addEventListener('keydown', trapFocus);
     }
+
+    function closeMenu() {
+        mobileMenu.classList.add('hidden');
+        mobileMenuButton.setAttribute('aria-expanded', 'false');
+        if (lastFocusedElement) {
+            lastFocusedElement.focus();
+        }
+        document.removeEventListener('keydown', trapFocus);
+    }
+
+    function trapFocus(event) {
+        if (event.key !== 'Tab') return;
+
+        if (event.shiftKey) {
+            if (document.activeElement === firstFocusableElement) {
+                event.preventDefault();
+                lastFocusableElement.focus();
+            }
+        } else {
+            if (document.activeElement === lastFocusableElement) {
+                event.preventDefault();
+                firstFocusableElement.focus();
+            }
+        }
+    }
+
+    mobileMenuButton.addEventListener('click', () => {
+        const isHidden = mobileMenu.classList.contains('hidden');
+        if (isHidden) {
+            openMenu();
+        } else {
+            closeMenu();
+        }
+    });
 }
 
 /**
