@@ -15,41 +15,56 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="assets/css/style.css">
+
+    <!-- Theme-switcher logic to prevent FOUC -->
+    <script>
+        // On page load or when changing themes, best to add inline in `head` to avoid FOUC
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
 </head>
-<body class="bg-gray-50 text-gray-700">
+<body class="bg-gray-50 text-gray-700 dark:bg-gray-900 dark:text-gray-300 transition-colors duration-300">
 
     <!-- Top Header -->
-    <header class="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-50">
+    <header class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg shadow-sm sticky top-0 z-50">
         <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="text-2xl font-bold text-gray-800">
+            <div class="text-2xl font-bold text-gray-800 dark:text-white">
                 Tools Hub
             </div>
 
-            <!-- Desktop Navigation -->
-            <nav class="hidden md:flex items-center space-x-8">
-                <a href="#" class="text-gray-600 hover:text-blue-600 transition-colors">Home</a>
-                <a href="#tools" class="text-gray-600 hover:text-blue-600 transition-colors">Tools</a>
-                <a href="mailto:contact@toolshub.dev" class="text-gray-600 hover:text-blue-600 transition-colors">Contact</a>
-            </nav>
-            <div class="hidden md:block">
-                <a href="mailto:contact@toolshub.dev" class="text-sm text-gray-500 hover:text-blue-600">contact@toolshub.dev</a>
-            </div>
+            <div class="flex items-center">
+                <!-- Desktop Navigation -->
+                <nav class="hidden md:flex items-center space-x-8">
+                    <a href="#" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Home</a>
+                    <a href="#tools" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Tools</a>
+                    <a href="mailto:contact@toolshub.dev" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Contact</a>
+                </nav>
 
-            <!-- Mobile Menu Button -->
-            <button id="mobile-menu-button" class="md:hidden text-gray-600 focus:outline-none" aria-controls="mobile-menu" aria-expanded="false">
-                <span class="sr-only">Open main menu</span>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <title>Menu Icon</title>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
-                </svg>
-            </button>
+                <!-- Theme Toggle Button -->
+                <button id="theme-toggle" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5 ml-8">
+                    <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                    <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm-.707 10.607a1 1 0 010-1.414l.707-.707a1 1 0 111.414 1.414l-.707.707a1 1 0 01-1.414 0zM3 11a1 1 0 100-2H2a1 1 0 100 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                </button>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-button" class="md:hidden text-gray-600 dark:text-gray-300 focus:outline-none ml-4" aria-controls="mobile-menu" aria-expanded="false">
+                    <span class="sr-only">Open main menu</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <title>Menu Icon</title>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                    </svg>
+                </button>
+            </div>
         </div>
 
         <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden md:hidden px-6 pt-2 pb-4 space-y-2 bg-white shadow-md">
-            <a href="#" class="block text-gray-600 hover:text-blue-600 py-2">Home</a>
-            <a href="#tools" class="block text-gray-600 hover:text-blue-600 py-2">Tools</a>
-            <a href="mailto:contact@toolshub.dev" class="block text-gray-600 hover:text-blue-600 py-2">Contact</a>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pt-2 pb-4 space-y-2 bg-white dark:bg-gray-800 shadow-md">
+            <a href="#" class="block text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 py-2">Home</a>
+            <a href="#tools" class="block text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 py-2">Tools</a>
+            <a href="mailto:contact@toolshub.dev" class="block text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 py-2">Contact</a>
         </div>
     </header>
 
@@ -57,12 +72,12 @@
 
         <!-- Hero Section -->
         <section class="text-center my-16 md:my-24">
-            <h1 class="text-4xl md:text-6xl font-bold text-gray-800 leading-tight">Your Daily Tools, All in One Place</h1>
-            <p class="text-lg md:text-xl text-gray-500 mt-4 max-w-3xl mx-auto">Convert, calculate, compress, and simplify your everyday tasks — fast and free.</p>
+            <h1 class="text-4xl md:text-6xl font-bold text-gray-800 dark:text-white leading-tight">Your Daily Tools, All in One Place</h1>
+            <p class="text-lg md:text-xl text-gray-500 dark:text-gray-400 mt-4 max-w-3xl mx-auto">Convert, calculate, compress, and simplify your everyday tasks — fast and free.</p>
             <a href="#search-bar" class="inline-block bg-blue-600 text-white font-semibold py-3 px-8 rounded-lg mt-10 text-lg hover:bg-blue-700 shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
                 Explore Tools
             </a>
-            <div class="flex justify-center items-center space-x-8 md:space-x-12 mt-16 text-gray-500">
+            <div class="flex justify-center items-center space-x-8 md:space-x-12 mt-16 text-gray-500 dark:text-gray-400">
                 <!-- Icon: Image -->
                 <div class="text-center space-y-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto text-blue-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><title>Image Tools Icon</title><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25z" /></svg>
@@ -90,11 +105,18 @@
         <section id="search-bar" class="my-20" role="search">
             <div class="relative max-w-2xl mx-auto">
                 <label for="tool-search" class="sr-only">Search Tools</label>
-                <input type="search" id="tool-search" placeholder="Search a tool by name or keyword..." class="w-full py-4 pl-6 pr-12 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300 ease-in-out shadow-sm focus:shadow-lg">
-                <svg class="w-6 h-6 text-gray-400 absolute right-4 top-1/2 -translate-y-1/2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                <input type="search" id="tool-search" placeholder="Search a tool by name or keyword..." class="w-full py-4 pl-6 pr-12 text-gray-700 bg-white border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300 ease-in-out shadow-sm focus:shadow-lg dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500">
+                <svg class="w-6 h-6 text-gray-400 dark:text-gray-400 absolute right-4 top-1/2 -translate-y-1/2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                     <title>Search Icon</title>
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                 </svg>
+            </div>
+        </section>
+
+        <!-- Category Filters -->
+        <section id="category-filters" class="my-12">
+            <div id="filter-buttons" class="flex flex-wrap justify-center gap-4">
+                <!-- Filter buttons will be generated by JavaScript -->
             </div>
         </section>
 
@@ -105,19 +127,19 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-white border-t mt-20">
+    <footer class="bg-white border-t mt-20 dark:bg-gray-800 dark:border-gray-700">
         <div class="container mx-auto px-6 py-8">
             <div class="flex flex-col md:flex-row justify-between items-center text-center md:text-left space-y-6 md:space-y-0">
                 <div>
-                    <div class="text-xl font-bold text-gray-800">Tools Hub</div>
-                    <p class="text-gray-500 mt-1">Simplifying your digital life.</p>
+                    <div class="text-xl font-bold text-gray-800 dark:text-white">Tools Hub</div>
+                    <p class="text-gray-500 dark:text-gray-400 mt-1">Simplifying your digital life.</p>
                 </div>
                 <div>
-                    <a href="mailto:contact@toolshub.dev" class="text-gray-500 hover:text-blue-600">contact@toolshub.dev</a>
+                    <a href="mailto:contact@toolshub.dev" class="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400">contact@toolshub.dev</a>
                 </div>
                 <div class="space-x-6">
-                    <a href="#" class="text-gray-500 hover:text-blue-600 text-sm">Privacy Policy</a>
-                    <a href="#" class="text-gray-500 hover:text-blue-600 text-sm">Terms of Use</a>
+                    <a href="#" class="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm">Privacy Policy</a>
+                    <a href="#" class="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm">Terms of Use</a>
                 </div>
             </div>
         </div>

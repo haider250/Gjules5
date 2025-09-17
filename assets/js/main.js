@@ -104,17 +104,17 @@ function generateTools() {
 
     const allSectionsHtml = toolData.map(section => {
         const toolsHtml = section.tools.map(tool => `
-            <div class="tool-card bg-white p-6 rounded-lg shadow-md border border-gray-100">
-                <h3 class="text-lg font-bold text-gray-800 tool-name">${tool.name}</h3>
-                <p class="text-gray-500 text-sm mt-1 tool-desc">${tool.desc}</p>
-                <a href="#" class="inline-block mt-4 bg-blue-50 text-blue-700 font-semibold py-2 px-4 rounded-md hover:bg-blue-100 transition-colors">Use Tool</a>
+            <div class="tool-card card-hidden bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-100 dark:border-gray-700">
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white tool-name">${tool.name}</h3>
+                <p class="text-gray-500 dark:text-gray-400 text-sm mt-1 tool-desc">${tool.desc}</p>
+                <a href="#" class="inline-block mt-4 bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 font-semibold py-2 px-4 rounded-md hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors">Use Tool</a>
             </div>
         `).join('');
 
         return `
-            <section class="tool-section my-16">
-                <h2 class="text-3xl font-bold text-gray-800">${section.category}</h2>
-                <p class="text-gray-500 mt-2">${section.description}</p>
+            <section class="tool-section my-16" data-category="${section.category}">
+                <h2 class="text-3xl font-bold text-gray-800 dark:text-white">${section.category}</h2>
+                <p class="text-gray-500 dark:text-gray-400 mt-2">${section.description}</p>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
                     ${toolsHtml}
                 </div>
@@ -124,6 +124,50 @@ function generateTools() {
 
     toolsContainer.innerHTML = allSectionsHtml;
 }
+
+/**
+ * Sets up the interactive category filters.
+ */
+function setupCategoryFilters() {
+    const filterButtonsContainer = document.getElementById('filter-buttons');
+    if (!filterButtonsContainer) return;
+
+    const categories = ['All', ...new Set(toolData.map(item => item.category))];
+
+    const buttonsHtml = categories.map(category => {
+        const isActive = category === 'All';
+        const baseClasses = 'filter-btn px-4 py-2 font-semibold rounded-lg transition-colors duration-200';
+        const activeClasses = 'bg-blue-600 text-white';
+        const inactiveClasses = 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600';
+        return `<button class="${baseClasses} ${isActive ? activeClasses : inactiveClasses}" data-category="${category}">${category.split(' ')[1] || category}</button>`;
+    }).join('');
+
+    filterButtonsContainer.innerHTML = buttonsHtml;
+
+    filterButtonsContainer.addEventListener('click', (event) => {
+        const target = event.target;
+        if (!target.matches('.filter-btn')) return;
+
+        // Update active button style
+        filterButtonsContainer.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.remove('bg-blue-600', 'text-white');
+            btn.classList.add('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-200', 'hover:bg-gray-300', 'dark:hover:bg-gray-600');
+        });
+        target.classList.add('bg-blue-600', 'text-white');
+        target.classList.remove('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-200', 'hover:bg-gray-300', 'dark:hover:bg-gray-600');
+
+        // Filter sections
+        const selectedCategory = target.dataset.category;
+        document.querySelectorAll('.tool-section').forEach(section => {
+            if (selectedCategory === 'All' || section.dataset.category === selectedCategory) {
+                section.style.display = 'block';
+            } else {
+                section.style.display = 'none';
+            }
+        });
+    });
+}
+
 
 /**
  * Sets up the mobile menu toggle functionality.
@@ -149,6 +193,11 @@ function setupLiveSearch() {
 
     searchInput.addEventListener('keyup', (event) => {
         const query = event.target.value.toLowerCase().trim();
+
+        // When searching, reset category filter to "All" to avoid conflicts
+        const allButton = document.querySelector('.filter-btn[data-category="All"]');
+        if (allButton) allButton.click();
+
         const toolSections = document.querySelectorAll('.tool-section');
 
         toolSections.forEach(section => {
@@ -172,7 +221,86 @@ function setupLiveSearch() {
     });
 }
 
+/**
+ * Sets up the theme switcher functionality.
+ */
+function setupThemeSwitcher() {
+    const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+    const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+    const themeToggleButton = document.getElementById('theme-toggle');
+
+    if (!themeToggleButton) return;
+
+    // Change the icons inside the button based on previous settings
+    if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        themeToggleLightIcon.classList.remove('hidden');
+    } else {
+        themeToggleDarkIcon.classList.remove('hidden');
+    }
+
+    themeToggleButton.addEventListener('click', function() {
+        // toggle icons inside button
+        themeToggleDarkIcon.classList.toggle('hidden');
+        themeToggleLightIcon.classList.toggle('hidden');
+
+        // if set via local storage previously
+        if (localStorage.getItem('color-theme')) {
+            if (localStorage.getItem('color-theme') === 'light') {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('color-theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('color-theme', 'light');
+            }
+        // if NOT set via local storage previously
+        } else {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('color-theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('color-theme', 'dark');
+            }
+        }
+    });
+}
+
+/**
+ * Sets up on-scroll animations for elements like tool cards.
+ */
+function setupScrollAnimations() {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('card-visible');
+                entry.target.classList.remove('card-hidden');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, {
+        threshold: 0.1
+    });
+
+    const cards = document.querySelectorAll('.tool-card');
+    cards.forEach(card => {
+        // A more robust check to see if any part of the card is in the viewport.
+        // This is more reliable in different browser environments and timings.
+        const rect = card.getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom >= 0) {
+            card.classList.add('card-visible');
+            card.classList.remove('card-hidden');
+        } else {
+            // Otherwise, observe it for scrolling.
+            observer.observe(card);
+        }
+    });
+}
+
+
 // --- App Initialization ---
 generateTools();
+setupCategoryFilters();
 setupMobileMenu();
 setupLiveSearch();
+setupThemeSwitcher();
+setupScrollAnimations();
