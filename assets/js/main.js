@@ -104,7 +104,7 @@ function generateTools() {
 
     const allSectionsHtml = toolData.map(section => {
         const toolsHtml = section.tools.map(tool => `
-            <div class="tool-card card-hidden bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-100 dark:border-gray-700">
+            <div class="tool-card card-hidden glass-effect bg-white/50 dark:bg-gray-800/50 p-6 rounded-lg shadow-md border border-white/60 dark:border-gray-700/60">
                 <h3 class="text-lg font-bold text-gray-800 dark:text-white tool-name">${tool.name}</h3>
                 <p class="text-gray-500 dark:text-gray-400 text-sm mt-1 tool-desc">${tool.desc}</p>
                 <a href="#" class="inline-block mt-4 bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 font-semibold py-2 px-4 rounded-md hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors">Use Tool</a>
